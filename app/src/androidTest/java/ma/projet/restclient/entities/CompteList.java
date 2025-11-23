@@ -7,13 +7,14 @@ import java.util.List;
 @Root(name = "List", strict = false)
 public class CompteList {
     @ElementList(inline = true, entry = "item")
-    private List<Compte> comptes;
+    private List<Compte> items;
 
+    // Retourne la liste des comptes (nom de méthode inchangé pour compatibilité)
     public List<Compte> getComptes() {
-        return comptes;
+        return items;
     }
 
     public void setComptes(List<Compte> comptes) {
-        this.comptes = comptes;
+        this.items = comptes;
     }
 }

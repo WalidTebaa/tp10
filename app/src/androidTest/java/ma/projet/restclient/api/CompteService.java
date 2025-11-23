@@ -15,29 +15,29 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface CompteService {
-    // Récupérer tous les comptes en JSON
+    // Tous les comptes au format JSON
     @GET("banque/comptes")
     @Headers("Accept: application/json")
     Call<List<Compte>> getAllCompteJson();
 
-    // Récupérer tous les comptes en XML
+    // Tous les comptes au format XML (wrapper)
     @GET("banque/comptes")
     @Headers("Accept: application/xml")
     Call<CompteList> getAllCompteXml();
 
-    // Récupérer un compte par son ID
+    // Obtenir un compte par ID
     @GET("banque/comptes/{id}")
     Call<Compte> getCompteById(@Path("id") Long id);
 
-    // Ajouter un nouveau compte
+    // Créer un compte
     @POST("banque/comptes")
     Call<Compte> addCompte(@Body Compte compte);
 
-    // Mettre à jour un compte existant
+    // Mettre à jour
     @PUT("banque/comptes/{id}")
     Call<Compte> updateCompte(@Path("id") Long id, @Body Compte compte);
 
-    // Supprimer un compte
+    // Supprimer
     @DELETE("banque/comptes/{id}")
     Call<Void> deleteCompte(@Path("id") Long id);
 }

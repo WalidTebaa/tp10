@@ -12,61 +12,69 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CompteRepository {
-    private CompteService compteService;
-    private String format;
+    // client Retrofit qui appelle l'API
+    private CompteService apiClient;
+    // format attendu: "JSON" ou "XML"
+    private String mode;
 
-    // Constructeur pour initialiser le service avec le type de convertisseur
+    // Constructeur: on fournit le type de convertisseur (JSON/XML)
     public CompteRepository(String converterType) {
-        compteService = RetrofitClient.getClient(converterType).create(CompteService.class);
-        this.format = converterType;
+        this.apiClient = RetrofitClient.getClient(converterType).create(CompteService.class);
+        this.mode = converterType;
     }
 
-    // Méthode pour récupérer tous les comptes
+    // Récupère tous les comptes; transmet le résultat via le callback fourni
     public void getAllCompte(Callback<List<Compte>> callback) {
-        if ("JSON".equals(format)) {
-            Call<List<Compte>> call = compteService.getAllCompteJson();
+        if ("JSON".equalsIgnoreCase(mode)) {
+            Call<List<Compte>> call = apiClient.getAllCompteJson();
             call.enqueue(callback);
-        } else {
-            Call<CompteList> call = compteService.getAllCompteXml();
-            call.enqueue(new Callback<CompteList>() {
-                @Override
-                public void onResponse(Call<CompteList> call, Response<CompteList> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        // Convertir CompteList en List<Compte>
-                        List<Compte> comptes = response.body().getComptes();
-                        callback.onResponse(null, Response.success(comptes));
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<CompteList> call, Throwable t) {
-                    // Gérer les erreurs ici si nécessaire
-                }
-            });
+            return;
         }
+
+        // Si on veut de l'XML, on récupère d'abord le wrapper CompteList
+        Call<CompteList> xmlCall = apiClient.getAllCompteXml();
+        xmlCall.enqueue(new Callback<CompteList>() {
+            @Override
+            public void onResponse(Call<CompteList> call, Response<CompteList> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Compte> comptes = response.body().getComptes();
+                    // On notifie le callback externe avec la liste extraite
+                    callback.onResponse(null, Response.success(comptes));
+                } else {
+                    // Propager une réponse vide/erreur au callback externe
+                    callback.onResponse(null, Response.success(null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CompteList> call, Throwable t) {
+                // Transmettre l'erreur au callback externe
+                callback.onFailure(null, t);
+            }
+        });
     }
 
-    // Méthode pour récupérer un compte par son ID
+    // Récupérer un compte par identifiant
     public void getCompteById(Long id, Callback<Compte> callback) {
-        Call<Compte> call = compteService.getCompteById(id);
+        Call<Compte> call = apiClient.getCompteById(id);
         call.enqueue(callback);
     }
 
-    // Méthode pour ajouter un compte
+    // Ajouter un nouveau compte
     public void addCompte(Compte compte, Callback<Compte> callback) {
-        Call<Compte> call = compteService.addCompte(compte);
+        Call<Compte> call = apiClient.addCompte(compte);
         call.enqueue(callback);
     }
 
-    // Méthode pour mettre à jour un compte
+    // Mettre à jour un compte existant
     public void updateCompte(Long id, Compte compte, Callback<Compte> callback) {
-        Call<Compte> call = compteService.updateCompte(id, compte);
+        Call<Compte> call = apiClient.updateCompte(id, compte);
         call.enqueue(callback);
     }
 
-    // Méthode pour supprimer un compte
+    // Supprimer un compte
     public void deleteCompte(Long id, Callback<Void> callback) {
-        Call<Void> call = compteService.deleteCompte(id);
+        Call<Void> call = apiClient.deleteCompte(id);
         call.enqueue(callback);
     }
 }

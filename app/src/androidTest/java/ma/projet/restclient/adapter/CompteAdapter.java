@@ -14,7 +14,7 @@ import ma.projet.restclient.entities.Compte;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.CompteViewHolder> {
+public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.AccountViewHolder> {
     public interface OnDeleteClickListener {
         void onDeleteClick(Compte compte);
     }
@@ -22,46 +22,48 @@ public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.CompteView
         void onUpdateClick(Compte compte);
     }
 
-    private List<Compte> comptes;
+    private List<Compte> accountList;
     private OnDeleteClickListener onDeleteClickListener;
     private OnUpdateClickListener onUpdateClickListener;
 
     public CompteAdapter(OnDeleteClickListener onDeleteClickListener, OnUpdateClickListener onUpdateClickListener) {
-        this.comptes = new ArrayList<>();
+        this.accountList = new ArrayList<>();
         this.onDeleteClickListener = onDeleteClickListener;
         this.onUpdateClickListener = onUpdateClickListener;
     }
 
     @NonNull
     @Override
-    public CompteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public AccountViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_compte, parent, false);
-        return new CompteViewHolder(view);
+        return new AccountViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CompteViewHolder holder, int position) {
-        Compte compte = comptes.get(position);
+    public void onBindViewHolder(@NonNull AccountViewHolder holder, int position) {
+        Compte compte = accountList.get(position);
         holder.bind(compte);
     }
 
     @Override
     public int getItemCount() {
-        return comptes.size();
+        return accountList.size();
     }
 
     public void updateData(List<Compte> newComptes) {
-        this.comptes.clear();
-        this.comptes.addAll(newComptes);
+        this.accountList.clear();
+        if (newComptes != null) {
+            this.accountList.addAll(newComptes);
+        }
         notifyDataSetChanged();
     }
 
-    class CompteViewHolder extends RecyclerView.ViewHolder {
+    class AccountViewHolder extends RecyclerView.ViewHolder {
         private TextView tvId, tvSolde, tvType, tvDate;
         private View btnDelete, btnUpdate;
 
-        public CompteViewHolder(@NonNull View itemView) {
+        public AccountViewHolder(@NonNull View itemView) {
             super(itemView);
             tvId = itemView.findViewById(R.id.tvId);
             tvSolde = itemView.findViewById(R.id.tvSolde);
@@ -72,10 +74,10 @@ public class CompteAdapter extends RecyclerView.Adapter<CompteAdapter.CompteView
         }
 
         public void bind(Compte compte) {
-            tvId.setText("ID: " + compte.getId());
-            tvSolde.setText(String.format("Solde: %.2f", compte.getSolde()));
-            tvType.setText("Type: " + compte.getType());
-            tvDate.setText("Date: " + compte.getDateCreation());
+            tvId.setText("Identifiant: " + compte.getId());
+            tvSolde.setText(String.format("%.2f DH", compte.getSolde()));
+            tvType.setText(compte.getType());
+            tvDate.setText(compte.getDateCreation());
 
             btnDelete.setOnClickListener(v -> {
                 if (onDeleteClickListener != null) {
